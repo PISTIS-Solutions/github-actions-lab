@@ -1,0 +1,73 @@
+name: Multi stage matrix pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "multi-stage/**"
+
+jobs:
+  # JOB to run on change detection
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+      repository-projects: write
+      
+    steps:
+    - name: check out to repository
+      uses: actions/checkout@v3
+      with:
+        repository: PISTIS-Solutions/github-actions-lab
+        token: ${{ secrets.PAT }}
+
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ github.ref }}
+        filters: |
+          demo-app-a:
+            - 'multi-stage/demo-app-a/**'
+          demo-app-b:
+            - 'multi-stage/demo-app-b/**'
+
+    # Set job outputs to values from filter step
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+
+
+####################
+# all-demo-job
+#####################
+  demo_job:
+    needs: [changes]
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.changes.outputs.services) }} 
+    name: ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: ${{ matrix.package }} 
+    permissions:
+      contents: read
+      packages: write
+    defaults:
+      run:
+        working-directory: multi-stage/${{ matrix.package }}
+    steps:
+      - name: check out to repository
+        uses: actions/checkout@v3
+        with:
+          repository: PISTIS-Solutions/github-actions-lab
+          token: ${{ secrets.PAT }}
+
+      - name: Run simple linux commands
+        run: |
+          pwd
+          whoami
+          export SERVICE="${{ matrix.package }}"
+          echo $SERVICE
