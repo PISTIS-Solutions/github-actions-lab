@@ -1,1 +1,1 @@
-# simple-app
+# simple-app. I'm making a demo
