@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ${{ fromJSON(needs.changes.outputs.services) }} 
+        package: ${{ fromJSON(needs.changes.outputs.services) }}
     name: ${{ matrix.package }}
     runs-on: ubuntu-latest
     env:
