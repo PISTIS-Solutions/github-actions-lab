@@ -13,7 +13,7 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Expose the port that the application will use
+
 EXPOSE 8000
 
 # Start the application
